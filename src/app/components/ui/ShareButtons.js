@@ -1,11 +1,14 @@
 'use client';
 
-import { Button } from "@heroui/react";
+import { addToast,Button } from "@heroui/react";
 import { RiDownloadLine,RiFileCopyLine,RiTwitterXLine,RiFacebookFill,RiRedditLine } from "@remixicon/react";
 import Utils from "@/lib/utils"
 import { autoTranslation as t } from "@/lib/i18n";
+import { useState } from "react";
 
 export default function ShareButtons({tweets=[]}) {
+
+    const [isDownloading,setIsDownloading] = useState(false);
 
     const handleCopy = () => {
         const articleContent = document.querySelector('.article-content');
@@ -16,16 +19,16 @@ export default function ShareButtons({tweets=[]}) {
             e.clipboardData.setData('text/html', articleContent.innerHTML);
             e.clipboardData.setData('text/plain', articleContent.innerHTML);
             e.preventDefault();
+
+            addToast({
+                title: t('Copied'),
+                color: 'success',
+                hideCloseButton: true,
+                shouldShowTimeoutProgress: true,
+                variant: 'bordered',
+            });
         });
         document.execCommand('copy');
-
-        addToast({
-            title: t('Copied'),
-            color: 'success',
-            hideCloseButton: true,
-            shouldShowTimeoutProgress: true,
-            variant: 'bordered',
-        });
     }
     const handleShareToTwitter = () => {
         const url = encodeURIComponent(window.location.href);
@@ -39,8 +42,10 @@ export default function ShareButtons({tweets=[]}) {
         const url = encodeURIComponent(window.location.href);
         window.open(`https://www.reddit.com/submit?url=${url}`, '_blank');
     }
-    const handleDownloadAll = () =>{
-        Utils.downloadAllMedia(tweets);
+    const handleDownloadAll = async () =>{
+        setIsDownloading(true);
+        await Utils.downloadAllMedia(tweets);
+        setIsDownloading(false);
     }
 
     return (
@@ -48,7 +53,7 @@ export default function ShareButtons({tweets=[]}) {
             <Button isIconOnly color="primary" size="md" title="Copy" aria-label="Copy" onPress={handleCopy}>
                 <RiFileCopyLine className="w-5 h-5"/>
             </Button>
-            <Button isIconOnly color="primary" size="md" title="Download All" aria-label="Download All" onPress={handleDownloadAll}>
+            <Button isDisabled={isDownloading} isLoading={isDownloading} isIconOnly color="primary" size="md" title="Download All" aria-label="Download All" onPress={handleDownloadAll}>
                 <RiDownloadLine className="w-5 h-5"/>
             </Button>
             <Button isIconOnly color="primary" size="md" title="Share to Twitter" aria-label="Share to Twitter" onPress={handleShareToTwitter}>

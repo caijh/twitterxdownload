@@ -182,7 +182,7 @@ export default function TweetCard({ tweet,isFavorite=false,videoPreview=true,ena
                 className={`tweet-card w-full p-2 cursor-pointer select-none border-foreground/10 border-[1px] rounded-2xl ${className}`}
                 key={tweet.tweet_id}>
                 <CardHeader className="flex justify-between gap-4">
-                    <Link href={enableEdit?'#':`/creators/${tweet.screen_name}`} className='w-full flex flex-row gap-4'>
+                    <Link href={enableEdit?'#':`/creators/${tweet.screen_name}`} target="_blank" className='w-full flex flex-row gap-4'>
                         <Avatar
                             className="flex-shrink-0"
                             isBordered

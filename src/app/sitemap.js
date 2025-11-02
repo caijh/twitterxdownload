@@ -1,11 +1,6 @@
+
+const baseUrl = process.env.NODE_ENV == 'development'? 'http://localhost:3000':'https://twitterxdownload.com';
 export default async function sitemap() {
-    const baseUrl = 'https://twitterxdownload.com';
-
-    // 获取最新推文用于 sitemap
-    const tweets = await fetch(`${baseUrl}/api/requestdb?action=all`, {
-        cache: 'no-store'
-    }).then(res => res.json()).then(data => data.data || []).catch(() => []);
-
     const staticPages = [
         {
             url: `${baseUrl}/en`,
@@ -73,16 +68,71 @@ export default async function sitemap() {
             changeFrequency: 'monthly',
             priority: 0.6,
         },
+        {
+            url: `${baseUrl}/creators`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.6,
+        },
+        {
+            url: `${baseUrl}/friends-link`,
+            lastModified: new Date(),
+            changeFrequency: 'monthly',
+            priority: 0.6,
+        }
     ];
 
-    const tweetPages = tweets.map(tweet => ({
-        url: `${baseUrl}/tweets/${tweet.tweet_id}`,
-        lastModified: new Date(tweet.post_at || Date.now()),
-        changeFrequency: 'never',
-        priority: 1.0,
-    }));
+    let finalXML = [];
 
-    return [...staticPages, ...tweetPages];
+    try {
+        // 获取创作者列表
+        let dynamicPages = [];
+
+        const creators = await getAllCreators();
+        for(let i = 0;i<creators.length;i++){
+            const creator = creators[i];
+            dynamicPages.push({
+                url: `${baseUrl}/creators/${creator.screen_name}`,
+                lastModified: new Date(),
+                changeFrequency: 'daily',
+                priority: 1,
+            })
+        }
+
+        // 获取推文列表
+        const tweets = await getAllTweets();
+        for(let i = 0;i<tweets.length;i++){
+            const tweet = tweets[i];
+            dynamicPages.push({
+                url: `${baseUrl}/tweets/${tweet.tweet_id}`,
+                lastModified: new Date(),
+                changeFrequency: 'daily',
+                priority: 1,
+            })
+        }
+
+        return [...staticPages,...dynamicPages];
+    } catch (error) {
+        return staticPages;
+    }
+}
+const getAllCreators = async function(){
+    try{
+        const creatorsResp = await fetch(`${baseUrl}/api/requestdb?action=creators&limit=100`);
+        const creatorsData = await creatorsResp.json();
+        return creatorsData.data;
+    }catch(err){
+        return [];
+    }
+}
+const getAllTweets = async function(){
+    try{
+        const tweetsResp = await fetch(`${baseUrl}/api/requestdb?action=all`);
+        const tweetsData = await tweetsResp.json();
+        return tweetsData.data;
+    }catch(err){
+        return [];
+    }
 }
 
 // 导出 sitemap 生成器配置

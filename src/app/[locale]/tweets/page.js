@@ -23,7 +23,8 @@ export default function Tweets({ params: { locale } }) {
     const contentTypes = [
         { key: "all", label: t('All') },
         { key: "video", label: t('Video') },
-        { key: "image", label: t('Image') }
+        { key: "image", label: t('Image') },
+        { key: "movie", label: t('Movie') }
     ];
 
     const dateRanges = [
@@ -40,8 +41,9 @@ export default function Tweets({ params: { locale } }) {
     const [content_type, setContentType] = useState('all');
     const [date_range, setDateRange] = useState('all');
     const [loading, setLoading] = useState(false);
-    const [lastTweetId, setLastTweetId] = useState(null);
+    const [lastCursor, setLastCursor] = useState(null);
     const [tweets, setTweets] = useState([[], [], []]);
+    const [canLoadMore,setCanLoadMore] = useState(false);
 
     const [shouldSearch, setShouldSearch] = useState(name || screen_name || text);
 
@@ -74,10 +76,33 @@ export default function Tweets({ params: { locale } }) {
         if(loading) return;
         setLoading(true);
 
-        const response = await fetch(`/api/requestdb?action=search&name=${name}&screen_name=${screen_name}&text=${text}&content_type=${content_type}&date_range=${date_range}&cursor=${cursor}`);
+        const params = new URLSearchParams();
+        //action=search&name=${name}&screen_name=${screen_name}&text=${text}&content_type=${content_type}&date_range=${date_range}&cursor=${cursor}
+        params.set('action','search');
+        name && params.set('name',name);
+        screen_name && params.set('screen_name',screen_name);
+        text && params.set('text',text);
+        cursor && params.set('cursor',cursor);
+
+        params.set('content_type',content_type);
+        params.set('date_range',date_range);
+
+        const response = await fetch(`/api/requestdb?${params.toString()}`);
         const data = await response.json();
 
-        if(data.data.length > 0) setLastTweetId(data.data[data.data.length - 1]._id);
+        setCanLoadMore(data.data.length>=20)
+
+        const last = data.data.at(-1);
+        if (last) {
+            const cursorPayload = JSON.stringify({
+                id: last._id,
+                post_at: last.post_at,
+                ...(last.score !== undefined ? { score: last.score } : {})
+            });
+            setLastCursor(cursorPayload);
+        } else {
+            setLastCursor(null);
+        }
         
         setTweets(prevTweets => {
             let targetTweets;
@@ -106,7 +131,9 @@ export default function Tweets({ params: { locale } }) {
         });
         setLoading(false);
 
-        if(!cursor) router.replace(`/tweets?${name ? `name=${name}&` : ''}${screen_name ? `screen_name=${screen_name}&` : ''}${text ? `text=${text}&` : ''}`);
+        if(!cursor) {
+            router.replace(`/tweets?${name ? `name=${name}&` : ''}${screen_name ? `screen_name=${screen_name}&` : ''}${text ? `text=${text}&` : ''}`);
+        }
     }
 
     const handleClear = () => {
@@ -114,6 +141,7 @@ export default function Tweets({ params: { locale } }) {
         setScreenName('');
         setText('');
         setTweets([[], [], []]);
+        setLastCursor(null);
     }
 
     return (
@@ -257,11 +285,11 @@ export default function Tweets({ params: { locale } }) {
                                 </div>
                             ))}
                         </div>
-                        <div className="flex justify-center">
-                            <Button isLoading={loading} isDisabled={loading} color="primary" variant="light" size="lg" radius="xs" className="px-8 mt-4 flex-1 md:flex-none" onPress={() => handleSearch({cursor:lastTweetId})}>
+                        {canLoadMore && <div className="flex justify-center">
+                            <Button isLoading={loading} isDisabled={loading} color="primary" variant="light" size="lg" radius="xs" className="px-8 mt-4 flex-1 md:flex-none" onPress={() => handleSearch({cursor:lastCursor})}>
                                 {t('Load More')}
                             </Button>
-                        </div>
+                        </div>}
                     </>
                 ) : (
                     <div className="text-center py-44 text-default-500">

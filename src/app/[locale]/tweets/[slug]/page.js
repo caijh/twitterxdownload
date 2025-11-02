@@ -134,7 +134,7 @@ export default async function TweetDetail({params}) {
         <div className="page-container flex flex-row gap-6 p-4 mt-4 flex-wrap md:flex-nowrap w-full">
             <div className="flex flex-col flex-1 gap-4 box-border border-foreground/10 border-[1px] rounded-2xl p-8 bg-[#f8f8f8] dark:bg-foreground/5">
                 <div className="flex gap-4">
-                    <Link href={`/creators/${tweet.screen_name}`} className='w-full flex gap-4'>
+                    <Link href={`/creators/${tweet.screen_name}`} target="_blank" className='w-full flex gap-4'>
                         <div className="box-border flex-shrink-0 p-1">
                             <Avatar disableAnimation isBordered src={tweet.profile_image||''} alt={`${tweet.name} avatar`} size="lg" radius="full"/>
                         </div>

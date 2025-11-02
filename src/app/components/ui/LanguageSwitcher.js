@@ -27,7 +27,8 @@ export default function LanguageSwitcher({ locale = 'en' }) {
     
     // 构建新的URL,包含查询参数
     const newPath = `/${key}${pathWithoutLocale}${queryString ? `?${queryString}` : ''}`;
-    router.push(newPath);
+    
+    window.location.href = newPath;
   };
 
   return (

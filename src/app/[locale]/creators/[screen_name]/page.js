@@ -1,6 +1,6 @@
 import { getTranslation } from "@/lib/i18n";
 import { headers } from 'next/headers'
-import { Avatar, Button,Link } from "@heroui/react";
+import { Avatar, Button,Chip,Link } from "@heroui/react";
 import TweetCard from '@/app/components/ui/TweetCard';
 import { RiSearchLine,RiTwitterXFill } from "@remixicon/react";
 
@@ -11,6 +11,7 @@ async function getCreatorData(screen_name) {
     const baseUrl = `${protocol}://${host}`
     const detailResp = await fetch(`${baseUrl}/api/requestdb?action=creator&screen_name=${screen_name}`);
     const data = await detailResp.json();
+    
     const tweetData = data.data;
     return tweetData;
 }
@@ -52,16 +53,16 @@ export default async function CreatorDetail({params}) {
                 <div className="flex flex-col gap-1 pt-3 flex-1 overflow-hidden items-center">
                     <h1 className="text-medium font-semibold leading-none text-default-600 overflow-hidden text-ellipsis whitespace-nowrap">{creator.name}</h1>
                     <p className="text-small text-default-400 overflow-hidden text-ellipsis whitespace-nowrap">@{creator.screen_name}</p>
-                    {description && <p className='max-w-[340px] mt-2 p-4 border-[1px] border-foreground/50 text-foreground rounded-md'>{description}</p>}
+                    {description && <p className='w-[340px] mt-2 p-4 border-[1px] border-foreground/50 text-foreground rounded-md'>{description}</p>}
                 </div>
             </div>
-            <div className='max-w-[340px] flex flex-col gap-4'>
+            <div className='w-[340px] flex flex-col gap-4'>
                 <div className="w-full flex flex-row gap-2">
                     <Button as={Link} href={`/tweets?screen_name=${screen_name}`} color='primary' variant="solid" startContent={<RiSearchLine className='w-4 h-4'/>} className="w-full">{t('Search')}</Button>
                     <Button as={Link} href={`https://x.com/${screen_name}`} target="blank" color='primary' variant="solid" startContent={<RiTwitterXFill className='w-4 h-4'/>}>{t('')}</Button>
                 </div>
                 <div className="w-full text-center">{t('Recent Tweet')}</div>
-                <TweetCard tweet={tweet} locale={locale} enableEdit={false} className="cursor-auto select-text"/>
+                <TweetCard className='w-[340px]' tweet={tweet} locale={locale} enableEdit={false} className="cursor-auto select-text"/>
             </div>
         </div>
     )

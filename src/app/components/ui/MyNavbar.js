@@ -9,8 +9,6 @@ import {
 import { getTranslation } from "@/lib/i18n";
 import Image from "next/image";
 import LanguageSwitcher from "./LanguageSwitcher"; // 新的客户端组件
-import { ThemeSwitcher } from "./ThemeSwitcher";
-import FriendsLink from "./FriendsLink";
 import { RiSearchLine } from "@remixicon/react";
 
 export default function MyNavbar({ locale = 'en' }) {
@@ -42,6 +40,9 @@ export default function MyNavbar({ locale = 'en' }) {
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end" className="hidden md:flex">
+          <NavbarItem className="hidden md:flex">
+            <LanguageSwitcher locale={locale} />
+          </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end" className="md:hidden">
         <NavbarItem>
